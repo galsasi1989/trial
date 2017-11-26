@@ -2,7 +2,7 @@ package jobdsl.Constants
 
 enum Track {
 
-	QUICK('quick')
+	QUICK('quick'),
 	FULL('full')
 	
 	public final String track
