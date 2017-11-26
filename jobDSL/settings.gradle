@@ -1,2 +1,2 @@
-rootProject.name = 'bdi-job-dsl'
+rootProject.name = 'job-dsl'
 include 'job-dsl-core', 'job-dsl-plugin', 'job-dsl-api-viewer'
