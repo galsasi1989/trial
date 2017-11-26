@@ -1,0 +1,114 @@
+apply plugin: 'groovy'
+apply plugin: 'idea'
+version
+group ='com.hp.bdi'
+apply plugin: 'maven'
+//def version
+//artifact ='bdi-job-dsl'
+
+task printProps {
+    doLast {
+        println dslContextParameter
+    }
+}
+
+task (loadVersion) {
+
+    Properties properties = new Properties()
+    File propsFile = new File('../build-descriptor.properties')
+    properties.load(propsFile.newDataInputStream())
+    println properties
+    version = properties.get("BDI_VERSION") + '-SNAPSHOT'
+    //return version
+
+
+}// - See more at: http://www.tikalk.com/devops/increment-version-numbers-in-gradle/#sthash.S4wJcd2R.dpuf
+
+sourceSets {
+    jobs {
+        groovy {
+            srcDirs 'jobs'
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task repoJar(type: Jar, dependsOn: classes) {
+    classifier = 'repo'
+
+    into('jobDSL/gradle'){
+        from "$projectDir/gradle"
+    }
+    into('jobDSL/jobs'){
+        from "$projectDir/jobs"
+    }
+
+    into('jobDSL/src'){
+        from "$projectDir/src"
+    }
+    into('jobDSL/src/main/resources'){
+        from "$projectDir/resources"
+    }
+    into('jobDSL/helper'){
+        from "$projectDir/helper"
+    }
+    into("jobDSL"){
+        from "." include "gradlew"
+        from "." include "build.gradle"
+        from "." include "gradle.properties"
+        from "." include "gradlew.bat"
+        from "." include "label.properties"
+        from "." include "settings.gradle"
+        from "../" include "build-descriptor.properties"
+    }
+    into('Server'){
+        from "../" include "build-descriptor.properties"
+    }
+
+}
+
+artifacts {
+    archives repoJar
+}
+
+repositories {
+    // mavenCentral()
+    maven {
+        if(dslContextParameter == 'bdi') {
+            url 'http://mydtbld0051.hpeswlab.net:8081/nexus/content/repositories/bdi-all/'
+        } else {
+            url dslContextParameter
+        }
+    }
+}
+
+dependencies {
+    compile 'org.jenkins-ci.plugins:job-dsl-core:1.53'
+    compile 'commons-io:commons-io:2.5'
+    compile fileTree("./resources")
+}
+/*
+task prepareWrapper(type: Wrapper) {
+    distributionUrl='ido'
+}*/
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.5'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            snapshotRepository(url: "http://mydtbld0051.hpeswlab.net:8081/nexus/content/repositories/bdi-snapshots") {
+                authentication(userName: "deployment", password: "deployment123")
+            }
+//            pom.version = "1.0-SNAPSHOT"
+//            pom.artifactId = "simple-project"
+//            pom.groupId = "com.example"
+        }
+    }
+}
