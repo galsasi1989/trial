@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'idea'
 version
-group ='com.hp.bdi'
+group =''
 apply plugin: 'maven'
 //def version
 //artifact ='bdi-job-dsl'
